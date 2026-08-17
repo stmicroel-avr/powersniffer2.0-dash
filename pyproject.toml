@@ -1,0 +1,14 @@
+[build-system]
+requires = ["uv_build>=0.8.0,<0.9.0"]
+build-backend = "uv_build"
+
+[project]
+name = "powersniffer"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "bleak>=1.1.1",
+]
+
+[project.scripts]
+powersniffer-listener = "powersniffer.listener:entry"
