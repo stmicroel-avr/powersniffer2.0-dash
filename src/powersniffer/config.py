@@ -6,6 +6,7 @@ import tomllib
 class DeviceConfig:
     addr: str
     name: str
+    packet_header: bytes
 
 
 @dataclass(frozen=True)
@@ -21,5 +22,6 @@ def load_config(path: str = "config.local.toml") -> Config:
         device=DeviceConfig(
             addr=raw["device"]["addr"],
             name=raw["device"]["name"],
+            packet_header=bytes(raw["device"]["packet_header"]),
         ),
     )

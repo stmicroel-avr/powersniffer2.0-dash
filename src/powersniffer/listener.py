@@ -26,5 +26,5 @@ def entry() -> None:
     logger.info("Starting listener")
     config = load_config()
     logger.info(f"Scan all Bluetooth devices and search {config.device.name} with address: {config.device.addr}")
-    bt = Client(config.device, NotificationDispatcher())
+    bt = Client(config.device, NotificationDispatcher(header=config.device.packet_header))
     asyncio.run(bt.run())
