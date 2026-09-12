@@ -15,10 +15,12 @@ class NotificationDispatcher:
         :return:
         """
         try:
-            series = self.parser.parse(packet)
+            series = self.parser.extract(packet)
         except ValueError:
             self.logger.warning("Invalid packet received")
             return
+
+        self.logger.info(f"Handling {series}")
 
         if not len(self.handlers):
             self.logger.warning(f"No handlers found")
