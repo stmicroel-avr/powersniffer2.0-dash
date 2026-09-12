@@ -1,0 +1,6 @@
+services:
+  app:
+    image: psniffer:latest
+    network_mode: host
+    volumes:
+      - /var/run/dbus:/var/run/dbus
