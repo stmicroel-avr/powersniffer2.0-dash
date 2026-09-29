@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from powersniffer.config import DeviceConfig
-from bleak import BleakClient, BleakScanner, BLEDevice, BleakError
+from bleak import BleakClient, BleakError, BleakScanner, BLEDevice
 
 from powersniffer.notification_dispatcher import NotificationDispatcher
 
@@ -19,15 +19,20 @@ class Client:
 
         :return:
         """
-        device = await self.scan()
-        if not device:
-            self.logger.error(f"Target device UID {self.device_config.addr} not found!")
+        self.logger.info(f"Discover device with addr {self.device_config.addr}")
+        device = await BleakScanner.find_device_by_address(
+            self.device_config.addr,
+            timeout=10,
+        )
+
+        if device is None:
+            self.logger.warning("Device %s not found", self.device_config.addr)
+            await asyncio.sleep(3)
             return
 
-        self.logger.info(f"Target device {device.name} with address {device.address} found")
         await self.reconnect(device)
 
-    async def reconnect(self, device: BLEDevice):
+    async def reconnect(self, device: BLEDevice|str):
         """
         Connect to a device with retry
         :param device: Device to connect with
@@ -35,7 +40,7 @@ class Client:
         """
         client = BleakClient(
             address_or_ble_device=device,
-            timeout=10,
+            timeout=15
         )
 
         connected = False
@@ -46,7 +51,7 @@ class Client:
 
             await asyncio.sleep(3)
 
-        notify_specifier = self.get_notify_char_specifier(client)
+        notify_specifier = await self.get_notify_char_specifier(client)
         if not notify_specifier:
             self.logger.warning(f"Unable to find characteristic type notify for device {client.address}")
             return
@@ -61,6 +66,7 @@ class Client:
         :param client:
         :return:
         """
+
         self.logger.info(f"Connecting to {client.address}")
 
         try:
@@ -77,29 +83,18 @@ class Client:
 
         return True
 
-    def get_notify_char_specifier(self, client: BleakClient):
+    async def get_notify_char_specifier(self, client: BleakClient):
         """
         Get a character type notify
         :param client:
         :return:
         """
+        self.logger.info("Services count: %s", len(client.services.services))
+
         for service in client.services:
             for characteristic in service.characteristics:
                 if 'notify' in characteristic.properties:
                     return characteristic.uuid
-        return None
-
-    async def scan(self) -> BLEDevice | None:
-        """
-        Scan all available devices
-        :return:
-        """
-        scanner = BleakScanner()
-        devices = await scanner.discover()
-        for device in devices:
-            self.logger.debug(f"Found device: {device}")
-            if device.address == self.device_config.addr and device.name == self.device_config.name:
-                return device
 
         return None
 
