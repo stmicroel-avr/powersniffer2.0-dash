@@ -1,0 +1,18 @@
+# Repo settings
+repo_clone_url: git@github.com:stmicroel-avr/powersniffer2.0-dash.git
+working_branch: main
+
+# UV packet manager settings
+uv_version: 0.12.21
+
+# Root directories path
+app_root: /opt/apps/psniffer-dash
+releases_dir: "{{ app_root }}/releases"
+current_dir: "{{ app_root }}/current"
+parent_dir: "{{ app_root }}/parent"
+releases_date_pattern: "%Y-%m-%d_%s"
+directories:
+ - "{{app_root}}"
+ - "{{releases_dir}}"
+ - "{{current_dir}}"
+ - "{{parent_dir}}"

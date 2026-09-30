@@ -1,0 +1,10 @@
+- name: Run deploy
+  hosts: raspberries
+  tasks:
+   - name: Print message
+     ansible.builtin.debug:
+       msg: Logged in
+
+   -
+
+  

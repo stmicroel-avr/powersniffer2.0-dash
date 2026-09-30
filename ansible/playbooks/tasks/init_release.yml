@@ -1,0 +1,9 @@
+- name: Clone parent repo
+  ansible.builtin.git:
+    repo: "{{repo_clone_url}}"
+    dest: "{{parent_dir}}"
+    single_branch: yes
+    version: "{{working_branch}}"
+
+- name: Init venv
+  ansible.builtin.command: "~/.local/bin/uv --directory {{parent_dir}} sync"
