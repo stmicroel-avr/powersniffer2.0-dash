@@ -5,6 +5,4 @@
      ansible.builtin.debug:
        msg: Logged in
 
-   -
-
   
