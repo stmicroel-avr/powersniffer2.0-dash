@@ -29,5 +29,5 @@
 - name: Create current release link
   ansible.builtin.file:
     src: "{{release_path}}"
-    dst: "{{active_release_link}}"
+    dest: "{{active_release_link}}"
     state: link
