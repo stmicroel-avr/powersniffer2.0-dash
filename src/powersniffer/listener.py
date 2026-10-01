@@ -27,7 +27,7 @@ def acquire_bluetooth_lock():
     f = open("/tmp/bluetooth.lock", "w")
     logger.info("Acquiring lock...")
     fcntl.flock(f, fcntl.LOCK_EX)
-
+    logger.info("Lock acquired")
 
 def entry() -> None:
     """
