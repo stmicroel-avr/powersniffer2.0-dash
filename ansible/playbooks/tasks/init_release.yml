@@ -19,7 +19,7 @@
 
 - name: Render application config
   ansible.builtin.template:
-    src: config.toml.j2
+    src: "{{playbook_dir}}/..templates/config.toml.j2"
     dest: "{{ release_path }}/config.toml"
     mode: "0644"
 
