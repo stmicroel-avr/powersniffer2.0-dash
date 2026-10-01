@@ -7,6 +7,11 @@ uv_version: 0.12.21
 
 # Root directories path
 app_root: /opt/apps/psniffer-dash
+logs_dir: "{{ app_root }}/logs"
 releases_dir: "{{ app_root }}/releases"
-current_symlink: "{{ app_root }}/current"
+active_release_link: "{{ app_root }}/current"
 releases_date_pattern: "%Y-%m-%d_%s"
+
+# Bluetooth device info
+bt_host_name: JDY-33-SPP
+bt_host_addr: 24:F7:3E:37:07:28

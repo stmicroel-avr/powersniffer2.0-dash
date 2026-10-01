@@ -1,4 +1,0 @@
-[device]
-addr = "XX:XX:XX:XX:XX:XX"
-name = "JDY-33-SPP"
-packet_header = [0xAA, 0x55]

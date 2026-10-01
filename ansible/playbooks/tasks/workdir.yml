@@ -1,0 +1,14 @@
+- name: Create root directory
+  ansible.builtin.file:
+    path: "{{app_root}}"
+    state: directory
+
+- name: Create release directory
+  ansible.builtin.file:
+    path: "{{releases_dir}}"
+    state: directory
+
+- name: Create logs directory
+  ansible.builtin.file:
+    path: "{{logs_dir}}"
+    state: directory

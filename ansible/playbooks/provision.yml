@@ -1,17 +1,11 @@
 - name: Build env
   hosts: raspberries
   tasks:
-   - name: Print message
-     ansible.builtin.debug:
-       msg: Logged in
+   - name: Create root directories
+     ansible.builtin.include_tasks: tasks/workdir.yml
 
    - name: UV
      ansible.builtin.include_tasks: tasks/uv.yml
-
-   - name: Create app root directories
-     ansible.builtin.file:
-       path: "{{releases_dir}}"
-       state: directory
 
    - name: Make init release
      ansible.builtin.include_tasks: tasks/init_release.yml

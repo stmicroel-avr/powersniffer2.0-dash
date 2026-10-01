@@ -33,7 +33,7 @@ dist/
 # Local config / secrets
 .env
 .env.*
-config.local.toml
+config.toml
 
 # Logs
 *.log

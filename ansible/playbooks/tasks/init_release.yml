@@ -1,9 +1,33 @@
+- name: Get current date
+  ansible.builtin.command: date "+{{releases_date_pattern}}"
+  register: current_date
+
+- name: Build release path
+  ansible.builtin.set_fact:
+    release_path: "{{releases_dir}}/{{current_date.stdout}}"
+
+- name: Show release path
+  ansible.builtin.debug:
+    msg: "Release path {{release_path}}"
+
 - name: Clone parent repo
   ansible.builtin.git:
     repo: "{{repo_clone_url}}"
-    dest: "{{parent_dir}}"
+    dest: "{{release_path}}"
     single_branch: yes
     version: "{{working_branch}}"
 
+- name: Render application config
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: "{{ release_path }}/config.toml"
+    mode: "0644"
+
 - name: Init venv
-  ansible.builtin.command: "~/.local/bin/uv --directory {{parent_dir}} sync"
+  ansible.builtin.command: "~/.local/bin/uv --directory {{release_path}} sync"
+
+- name: Create current release link
+  ansible.builtin.file:
+    src: "{{release_path}}"
+    dst: "{{active_release_link}}"
+    state: link

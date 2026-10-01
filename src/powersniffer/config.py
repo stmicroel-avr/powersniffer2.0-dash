@@ -14,7 +14,7 @@ class Config:
     device: DeviceConfig
 
 
-def load_config(path: str = "config.local.toml") -> Config:
+def load_config(path: str = "config.toml") -> Config:
     with open(path, "rb") as file:
         raw = tomllib.load(file)
 
