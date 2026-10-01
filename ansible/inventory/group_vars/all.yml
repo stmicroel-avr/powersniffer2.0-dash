@@ -8,11 +8,5 @@ uv_version: 0.12.21
 # Root directories path
 app_root: /opt/apps/psniffer-dash
 releases_dir: "{{ app_root }}/releases"
-current_dir: "{{ app_root }}/current"
-parent_dir: "{{ app_root }}/parent"
+current_symlink: "{{ app_root }}/current"
 releases_date_pattern: "%Y-%m-%d_%s"
-directories:
- - "{{app_root}}"
- - "{{releases_dir}}"
- - "{{current_dir}}"
- - "{{parent_dir}}"

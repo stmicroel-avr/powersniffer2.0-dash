@@ -10,9 +10,8 @@
 
    - name: Create app root directories
      ansible.builtin.file:
-       path: "{{item}}"
+       path: "{{releases_dir}}"
        state: directory
-     loop: "{{ directories }}"
 
    - name: Make init release
      ansible.builtin.include_tasks: tasks/init_release.yml
