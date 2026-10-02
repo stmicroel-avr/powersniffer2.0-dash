@@ -9,3 +9,6 @@
 
    - name: Make init release
      ansible.builtin.include_tasks: tasks/init_release.yml
+
+   - name: Run app
+     ansible.builtin.include_tasks: tasks/runner.yml
