@@ -1,8 +1,5 @@
-- name: Run deploy
+- name: Deploy new app version
   hosts: raspberries
   tasks:
-   - name: Print message
-     ansible.builtin.debug:
-       msg: Logged in
-
-  
+   - name: Run app
+     ansible.builtin.include_tasks: tasks/runner.yml

@@ -31,3 +31,4 @@
     src: "{{release_path}}"
     dest: "{{active_release_link}}"
     state: link
+
