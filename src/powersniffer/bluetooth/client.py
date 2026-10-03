@@ -20,11 +20,8 @@ class Client:
         :return:
         """
         self.logger.info(f"Discover device with addr {self.device_config.addr}")
-        device = await BleakScanner.find_device_by_address(
-            self.device_config.addr,
-            timeout=10,
-        )
 
+        device = await BleakScanner.find_device_by_address(self.device_config.addr)
         if device is None:
             self.logger.warning("Device %s not found", self.device_config.addr)
             await asyncio.sleep(3)
@@ -49,7 +46,7 @@ class Client:
             if connected:
                 break
 
-            await asyncio.sleep(3)
+            await asyncio.sleep(2)
 
         notify_specifier = await self.get_notify_char_specifier(client)
         if not notify_specifier:

@@ -1,7 +1,10 @@
 import fcntl
+import signal
 import asyncio
 import logging
+import sys
 from contextlib import contextmanager
+
 from powersniffer.config import load_config
 from powersniffer.bluetooth.client import Client
 from powersniffer.notification_dispatcher import NotificationDispatcher
@@ -37,14 +40,20 @@ def acquire_bluetooth_lock():
             logger.info("Releasing lock...")
             fcntl.flock(f, fcntl.LOCK_UN)
 
+def soft_stop(sig, frame):
+    logger.info("Soft stop app signal processing..")
+    sys.exit(0)
+
 def entry() -> None:
     """
     Entry point for the application.
     Run via uv
     :return:
     """
-    logger.info("Start app..")
     configure_logging()
+    signal.signal(signal.SIGINT, soft_stop)
+    signal.signal(signal.SIGTERM, soft_stop)
+    logger.info("Start app..")
     with acquire_bluetooth_lock():
         logger.info("Starting listener")
         config = load_config()
