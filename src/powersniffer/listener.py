@@ -41,13 +41,21 @@ def acquire_bluetooth_lock():
             fcntl.flock(f, fcntl.LOCK_UN)
 
 def soft_stop(sig, frame):
+    """
+    Handler for the SIGINT/SIGTERM signal.
+
+    :param sig:
+    :param frame:
+    :return:
+    """
     logger.info("Soft stop app signal processing..")
     sys.exit(0)
 
 def entry() -> None:
     """
     Entry point for the application.
-    Run via uv
+    Run via uv run
+
     :return:
     """
     configure_logging()

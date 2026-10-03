@@ -37,3 +37,10 @@
 
     - name: Run new app instance
       ansible.builtin.include_tasks: tasks/run_app.yml
+
+    - name: Stop old instance
+      ansible.builtin.shell:
+        cmd: "kill {{old_pid}}"
+      args:
+        executable: /bin/bash
+      when: (old_pid | regex_search("^\d+$")) == old_pid
