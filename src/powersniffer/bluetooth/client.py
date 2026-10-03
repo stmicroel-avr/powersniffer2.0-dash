@@ -1,9 +1,10 @@
 import asyncio
 import logging
+from asyncio import CancelledError
 
 from powersniffer.config import DeviceConfig
+import powersniffer.bluetooth.exceptions as BTExceptions
 from bleak import BleakClient, BleakError, BleakScanner, BLEDevice
-
 from powersniffer.notification_dispatcher import NotificationDispatcher
 
 
@@ -19,15 +20,46 @@ class Client:
 
         :return:
         """
-        self.logger.info(f"Discover device with addr {self.device_config.addr}")
-
-        device = await BleakScanner.find_device_by_address(self.device_config.addr)
-        if device is None:
-            self.logger.warning("Device %s not found", self.device_config.addr)
-            await asyncio.sleep(3)
+        try:
+            while True:
+                try:
+                    self.logger.info(f"Rediscover device with addr {self.device_config.addr}")
+                    device = await self.discover(self.device_config.addr)
+                    self.logger.info(f"Device {self.device_config.addr} found")
+                    await self.reconnect(device)
+                except (BTExceptions.NotifyCharacteristicNotFoundError,
+                        BTExceptions.ConnectionAttemptsExceededError,
+                        BTExceptions.NotificationSubscriptionError):
+                    continue
+                except Exception as e:
+                    self.logger.exception(e)
+                    await asyncio.sleep(5)
+        except CancelledError:
             return
 
-        await self.reconnect(device)
+    async def discover(self, addr: str) -> BLEDevice:
+        """
+        Try to discover device with addr
+
+        :param addr: BLE device addr
+        :return: BLEDevice
+        """
+        attempts = 0
+        while True:
+            found_device = None
+            try:
+                found_device = await BleakScanner.find_device_by_address(addr)
+            except BleakError as e:
+                self.logger.debug(f"Error search device: {e}")
+
+            if found_device is not None:
+                break
+
+            attempts += 1
+            self.logger.warning("Device %s not found(%s). Wait 10 seconds and retry..", addr, attempts)
+            await asyncio.sleep(10)
+
+        return found_device
 
     async def reconnect(self, device: BLEDevice|str):
         """
@@ -35,31 +67,49 @@ class Client:
         :param device: Device to connect with
         :return:
         """
+        disconnection_event = asyncio.Event()
         client = BleakClient(
             address_or_ble_device=device,
-            timeout=15
+            disconnected_callback=lambda _: disconnection_event.set(),
         )
 
-        connected = False
-        while not connected:
-            connected = await self.connect(client)
-            if connected:
-                break
+        try:
+            attempts = 1
+            while not await self.connect(client):
+                if attempts >= 5:
+                    self.logger.warning("Connection attempts exceeded")
+                    raise BTExceptions.ConnectionAttemptsExceededError()
 
-            await asyncio.sleep(2)
+                self.logger.info("Device is not connected(%s). Wait 5 second and retry connect...", attempts)
+                attempts += 1
+                await asyncio.sleep(5)
+                disconnection_event.clear()
 
-        notify_specifier = await self.get_notify_char_specifier(client)
-        if not notify_specifier:
-            self.logger.warning(f"Unable to find characteristic type notify for device {client.address}")
-            return
+            notify_specifier = await self.get_notify_char_specifier(client)
+            if not notify_specifier:
+                self.logger.warning(f"Unable to find characteristic type notify")
+                raise BTExceptions.NotifyCharacteristicNotFoundError
 
-        await client.start_notify(notify_specifier, self.notification_dispatcher.handle)
-        while True:
-            await asyncio.sleep(1)
+            try:
+                await client.start_notify(notify_specifier, self.notification_dispatcher.handle)
+            except BleakError as e:
+                self.logger.debug(f"Failed to start notify: {e}")
+                self.logger.warning(f"Notify subscription error")
+                raise BTExceptions.NotificationSubscriptionError()
+
+            await disconnection_event.wait()
+        finally:
+            if client and client.is_connected:
+                try:
+                    await client.disconnect()
+                except Exception as e:
+                    self.logger.warning(f"Failed to disconnect {client.address}")
+
 
     async def connect(self, client: BleakClient) -> bool:
         """
-        Connect to device
+        Connect to Bluetooth device
+
         :param client:
         :return:
         """
@@ -69,11 +119,10 @@ class Client:
         try:
             await client.connect()
         except BleakError as e:
-            self.logger.warning(f"Failed to connect to {client.address}. {e}")
+            self.logger.warning(f"Failed to connect {client.address}. {e}")
             return False
-
-        if not client.is_connected:
-            self.logger.warning(f"Unable to connect to {client.address}")
+        except TimeoutError as e:
+            self.logger.warning(f"Timeout to connect {client.address}. {e}")
             return False
 
         self.logger.info(f"Connected to {client.address}")
