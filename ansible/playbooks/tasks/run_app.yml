@@ -1,0 +1,13 @@
+- name: Create current release link
+  ansible.builtin.file:
+    src: "{{release_path}}"
+    dest: "{{active_release_link}}"
+    state: link
+
+- name: Start new app instance
+  ansible.builtin.shell: |
+    nohup {{ ansible_env.HOME }}/.local/bin/uv run {{uv_listener_id}} > app.log 2>&1 &
+    echo $! > app.pid
+  args:
+    chdir: "{{ active_release_link }}"
+    executable: /bin/bash

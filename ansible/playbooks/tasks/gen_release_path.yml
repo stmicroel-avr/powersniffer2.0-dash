@@ -2,6 +2,10 @@
   ansible.builtin.command: date "+{{releases_date_pattern}}"
   register: current_date
 
+- name: Build release path
+  ansible.builtin.set_fact:
+    release_path: "{{releases_dir}}/{{current_date.stdout}}"
+
 - name: Show release path
   ansible.builtin.debug:
-    msg: "Release dir path {{releases_dir}}/{{current_date.stdout}}"
+    msg: "Release path {{release_path}}"

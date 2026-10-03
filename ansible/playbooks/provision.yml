@@ -2,13 +2,13 @@
   hosts: raspberries
   tasks:
    - name: Create root directories
-     ansible.builtin.include_tasks: tasks/workdir.yml
+     ansible.builtin.include_tasks: tasks/make_workdir.yml
 
    - name: UV
-     ansible.builtin.include_tasks: tasks/uv.yml
+     ansible.builtin.include_tasks: tasks/install_uv.yml
 
    - name: Make init release
-     ansible.builtin.include_tasks: tasks/init_release.yml
+     ansible.builtin.include_tasks: tasks/make_app_env.yml
 
-   - name: Run app
-     ansible.builtin.include_tasks: tasks/runner.yml
+   - name: Run new app instance
+     ansible.builtin.include_tasks: tasks/run_app.yml

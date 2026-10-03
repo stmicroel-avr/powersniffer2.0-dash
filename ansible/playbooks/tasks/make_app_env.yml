@@ -1,0 +1,20 @@
+- name: Gen release path
+  ansible.builtin.include_tasks: gen_release_path.yml
+
+- name: Prepare app workdir
+  block:
+    - name: Clone parent repo
+      ansible.builtin.git:
+        repo: "{{repo_clone_url}}"
+        dest: "{{release_path}}"
+        single_branch: yes
+        version: "{{working_branch}}"
+
+    - name: Render application config
+      ansible.builtin.template:
+        src: "{{playbook_dir}}/../templates/config.toml.j2"
+        dest: "{{ release_path }}/config.toml"
+        mode: "0644"
+
+    - name: Init venv
+      ansible.builtin.command: "~/.local/bin/uv --directory {{release_path}} sync"

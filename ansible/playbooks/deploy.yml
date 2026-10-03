@@ -1,5 +1,39 @@
 - name: Deploy new app version
   hosts: raspberries
   tasks:
-   - name: Run app
-     ansible.builtin.include_tasks: tasks/runner.yml
+    - name: Get old app pid
+      block:
+        - name: Read old app pid
+          ansible.builtin.command: cat app.pid
+          register: pid_cmd
+          args:
+            chdir: "{{ active_release_link }}"
+
+        - name: Show old app pid
+          ansible.builtin.debug:
+            msg: "{{pid_cmd.stdout}}"
+
+        - name: Register old pid as var
+          ansible.builtin.set_fact:
+            old_pid: "{{pid_cmd.stdout}}"
+
+        - name: Check old pid format
+          ansible.builtin.debug:
+            msg: "Old PID {{old_pid}} is not valid!"
+          when: (old_pid | regex_search("^\d+$")) != old_pid
+
+    - name: Gen release path
+      ansible.builtin.include_tasks: tasks/gen_release_path.yml
+
+    - name: Make shadow copy
+      ansible.builtin.command:
+        cmd: "cp -L -r {{active_release_link}} {{release_path}}"
+
+    - name: Fetch latest state from git main
+      ansible.builtin.command:
+        cmd: git pull
+      args:
+        chdir: "{{release_path}}"
+
+    - name: Run new app instance
+      ansible.builtin.include_tasks: tasks/run_app.yml

@@ -15,7 +15,7 @@ def configure_logging() -> None:
     """
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(levelname)s] %(asctime)s - %(message)s"
+        format="[%(process)d] [%(levelname)s] %(asctime)s - %(message)s"
     )
 
 @contextmanager
