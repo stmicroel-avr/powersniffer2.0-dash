@@ -1,0 +1,48 @@
+- name: Try to install RMQ from apt
+  become: true
+  ansible.builtin.apt:
+    name: rabbitmq-server
+    state: present
+    update_cache: yes
+
+- name: Enable RabbitMQ management
+  become: true
+  community.rabbitmq.rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+    new_only: true
+
+- name: Create application vhost
+  become: true
+  community.rabbitmq.rabbitmq_vhost:
+    name: "{{rabbitmq_vhost}}"
+    state: present
+
+- name: Create RabbitMQ administrator
+  become: true
+  community.rabbitmq.rabbitmq_user:
+    user: admin
+    password: "{{ rmq_admin_password }}"
+    update_password: always
+    tags: administrator
+    vhost: /
+    configure_priv: ".*"
+    write_priv: ".*"
+    read_priv: ".*"
+    state: present
+  no_log: true
+
+- name: Create application user
+  become: true
+  community.rabbitmq.rabbitmq_user:
+    user: app
+    password: "{{ rmq_app_password }}"
+    update_password: always
+    tags: ""
+    permissions:
+      - vhost: "{{rabbitmq_vhost}}"
+        configure_priv: ".*"
+        write_priv: ".*"
+        read_priv: ".*"
+    state: present
+  no_log: true

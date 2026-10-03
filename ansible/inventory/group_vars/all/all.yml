@@ -16,3 +16,6 @@ releases_date_pattern: "%Y-%m-%d_%s"
 # Bluetooth device info
 bt_host_name: JDY-33-SPP
 bt_host_addr: 24:F7:3E:37:07:28
+
+# RMQ
+rabbitmq_vhost: psniffer

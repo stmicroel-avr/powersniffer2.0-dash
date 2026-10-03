@@ -1,6 +1,9 @@
 - name: Build env
   hosts: raspberries
   tasks:
+   - name: Install RMQ (standalone non docker)
+     ansible.builtin.include_tasks: tasks/install_rmq.yml
+
    - name: Create root directories
      ansible.builtin.include_tasks: tasks/make_workdir.yml
 
