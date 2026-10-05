@@ -19,3 +19,8 @@ bt_host_addr: 24:F7:3E:37:07:28
 
 # RMQ
 rabbitmq_vhost: psniffer
+
+# MongoDB
+mongodb_deb_link: "https://repo.mongodb.org/apt/ubuntu/dists/jammy/mongodb-org/9.0/multiverse/binary-arm64/mongodb-org-server_9.0.2_arm64.deb"
+mongodb_app_user: psniffer-app
+mongodb_app_dbname: "psniffer-metrics"

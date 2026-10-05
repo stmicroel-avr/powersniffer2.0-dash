@@ -1,0 +1,54 @@
+- name: Download mongodb
+  ansible.builtin.get_url:
+    url: "{{mongodb_deb_link}}"
+    dest: /tmp/mongodb.deb
+
+- name: Install a .deb package
+  become: true
+  ansible.builtin.apt:
+    deb: /tmp/mongodb.deb
+
+- name: Enable as service and start
+  become: true
+  ansible.builtin.systemd_service:
+    enabled: true
+    state: started
+    name: mongod
+
+- name: Install PyMongo
+  become: true
+  ansible.builtin.apt:
+    name: python3-pymongo
+    state: present
+
+- name: Create MongoDB superuser
+  become: true
+  community.mongodb.mongodb_user:
+    login_host: "127.0.0.1"
+    database: admin
+    name: admin
+    password: "{{ mongodb_admin_password }}"
+    roles:
+      - role: root
+        db: admin
+    state: present
+    update_password: always
+    create_for_localhost_exception: /var/lib/mongodb/.ansible-admin-created
+  no_log: true
+
+- name: Create MongoDB application user
+  community.mongodb.mongodb_user:
+    login_host: "127.0.0.1"
+    login_database: admin
+    login_user: admin
+    login_password: "{{ mongodb_admin_password }}"
+    auth_mechanism: SCRAM-SHA-256
+    database: "{{ mongodb_app_dbname }}"
+    name: "{{ mongodb_app_user }}"
+    password: "{{ mongodb_app_password }}"
+    roles:
+      - role: readWrite
+        db: "{{ mongodb_app_dbname }}"
+    state: present
+    update_password: on_create
+  no_log: true
