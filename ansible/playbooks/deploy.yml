@@ -52,4 +52,5 @@
         cmd: "kill {{old_pid}}"
       args:
         executable: /bin/bash
+      failed_when: false
       when: (old_pid | regex_search("^\d+$")) == old_pid
