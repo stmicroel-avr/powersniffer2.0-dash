@@ -5,14 +5,14 @@ from asyncio import CancelledError
 from powersniffer.config import DeviceConfig
 import powersniffer.bluetooth.exceptions as BTExceptions
 from bleak import BleakClient, BleakError, BleakScanner, BLEDevice
-from powersniffer.notification_dispatcher import NotificationDispatcher
+from powersniffer.event_dispatcher import EventDispatcher
 
 
 class Client:
-    def __init__(self, device_config: DeviceConfig, dispatcher: NotificationDispatcher):
+    def __init__(self, device_config: DeviceConfig, dispatcher: EventDispatcher):
         self.device_config = device_config
         self.logger = logging.getLogger(__name__)
-        self.notification_dispatcher = dispatcher
+        self.event_dispatcher = dispatcher
 
     async def run(self):
         """
@@ -91,7 +91,7 @@ class Client:
                 raise BTExceptions.NotifyCharacteristicNotFoundError
 
             try:
-                await client.start_notify(notify_specifier, self.notification_dispatcher.handle)
+                await client.start_notify(notify_specifier, self.event_dispatcher.dispatch)
             except BleakError as e:
                 self.logger.debug(f"Failed to start notify: {e}")
                 self.logger.warning(f"Notify subscription error")

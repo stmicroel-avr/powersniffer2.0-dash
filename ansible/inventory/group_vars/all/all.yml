@@ -18,7 +18,10 @@ bt_host_name: JDY-33-SPP
 bt_host_addr: 24:F7:3E:37:07:28
 
 # RMQ
-rabbitmq_vhost: psniffer
+rmq_vhost: psniffer
+rmq_app_user: psniffer-user
+rmq_app_exchange_name: psniffer-ex
+rmq_app_mongo_queue: psniffer-q-mongo
 
 # MongoDB
 mongodb_deb_link: "https://repo.mongodb.org/apt/ubuntu/dists/jammy/mongodb-org/9.0/multiverse/binary-arm64/mongodb-org-server_9.0.2_arm64.deb"

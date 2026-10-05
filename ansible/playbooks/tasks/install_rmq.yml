@@ -15,7 +15,7 @@
 - name: Create application vhost
   become: true
   community.rabbitmq.rabbitmq_vhost:
-    name: "{{rabbitmq_vhost}}"
+    name: "{{ rmq_vhost }}"
     state: present
 
 - name: Create RabbitMQ administrator
@@ -35,12 +35,12 @@
 - name: Create application user
   become: true
   community.rabbitmq.rabbitmq_user:
-    user: app
+    user: "{{ rmq_vhost }}"
     password: "{{ rmq_app_password }}"
     update_password: always
     tags: ""
     permissions:
-      - vhost: "{{rabbitmq_vhost}}"
+      - vhost: "{{ rmq_vhost }}"
         configure_priv: ".*"
         write_priv: ".*"
         read_priv: ".*"

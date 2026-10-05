@@ -1,13 +1,14 @@
+import sys
 import fcntl
 import signal
 import asyncio
 import logging
-import sys
 from contextlib import contextmanager
 
-from powersniffer.config import load_config
+from powersniffer.config import load_config, Config
 from powersniffer.bluetooth.client import Client
-from powersniffer.notification_dispatcher import NotificationDispatcher
+from powersniffer.queue_client import QueueClient
+from powersniffer.event_dispatcher import EventDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,16 @@ def soft_stop(sig, frame):
     logger.info("Soft stop app signal processing..")
     sys.exit(0)
 
+async def run_async(config: Config) -> None:
+    queue_client = QueueClient(config.rmq)
+    await queue_client.start()
+    bt = Client(
+        config.device,
+        EventDispatcher(config.device.packet_header, queue_client)
+    )
+
+    await bt.run()
+
 def entry() -> None:
     """
     Entry point for the application.
@@ -61,10 +72,10 @@ def entry() -> None:
     configure_logging()
     signal.signal(signal.SIGINT, soft_stop)
     signal.signal(signal.SIGTERM, soft_stop)
+
     logger.info("Start app..")
     with acquire_bluetooth_lock():
         logger.info("Starting listener")
         config = load_config()
         logger.info(f"Scan all Bluetooth devices and search {config.device.name} with address: {config.device.addr}")
-        bt = Client(config.device, NotificationDispatcher(header=config.device.packet_header))
-        asyncio.run(bt.run())
+        asyncio.run(run_async(config))

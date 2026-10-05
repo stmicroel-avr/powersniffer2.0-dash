@@ -7,7 +7,9 @@ name = "powersniffer"
 version = "0.1.0"
 requires-python = ">=3.9"
 dependencies = [
+    "aio-pika>=9.5.6",
     "bleak>=1.1.1",
+    "pymongo>=4.18.2",
 ]
 
 [project.scripts]
