@@ -35,6 +35,15 @@
       args:
         chdir: "{{release_path}}"
 
+    - name: Render application config
+      ansible.builtin.template:
+        src: "{{playbook_dir}}/../templates/config.toml.j2"
+        dest: "{{ release_path }}/config.toml"
+        mode: "0644"
+
+    - name: UV sync
+      ansible.builtin.command: "~/.local/bin/uv --directory {{release_path}} sync"
+
     - name: Run new app instance
       ansible.builtin.include_tasks: tasks/run_app.yml
 

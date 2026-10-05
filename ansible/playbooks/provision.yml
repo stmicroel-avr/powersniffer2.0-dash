@@ -4,17 +4,17 @@
    - name: Install mongodb (standalone non docker)
      ansible.builtin.include_tasks: tasks/install_mongod.yml
 
-#   - name: Install RMQ (standalone non docker)
-#     ansible.builtin.include_tasks: tasks/install_rmq.yml
-#
-#   - name: Create root directories
-#     ansible.builtin.include_tasks: tasks/make_workdir.yml
-#
-#   - name: UV
-#     ansible.builtin.include_tasks: tasks/install_uv.yml
-#
-#   - name: Make init release
-#     ansible.builtin.include_tasks: tasks/make_app_env.yml
-#
-#   - name: Run new app instance
-#     ansible.builtin.include_tasks: tasks/run_app.yml
+   - name: Install RMQ (standalone non docker)
+     ansible.builtin.include_tasks: tasks/install_rmq.yml
+
+   - name: Create root directories
+     ansible.builtin.include_tasks: tasks/make_workdir.yml
+
+   - name: UV
+     ansible.builtin.include_tasks: tasks/install_uv.yml
+
+   - name: Make init release
+     ansible.builtin.include_tasks: tasks/make_app_env.yml
+
+   - name: Run new app instance
+     ansible.builtin.include_tasks: tasks/run_app.yml
