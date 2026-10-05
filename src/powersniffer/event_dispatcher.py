@@ -4,12 +4,11 @@ from powersniffer.packet_parser import PacketParser
 
 
 class NotificationDispatcher:
-    def __init__(self, header: bytes, *args):
-        self.handlers = args
+    def __init__(self, header: bytes):
         self.parser = PacketParser(header)
         self.logger = logging.getLogger(__name__)
 
-    def handle(self, ch, packet) -> None:
+    def dispatch(self, ch, packet) -> None:
         """
         Handle all notifications
         :return:
@@ -20,11 +19,3 @@ class NotificationDispatcher:
             self.logger.warning("Invalid packet received")
             return
 
-        self.logger.info(f"Handling {series}")
-
-        if not len(self.handlers):
-            self.logger.warning(f"No handlers found")
-            return
-
-        for handler in self.handlers:
-            handler.handle(series)
