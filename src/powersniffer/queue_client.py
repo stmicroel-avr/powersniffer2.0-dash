@@ -47,7 +47,8 @@ class QueueClient:
         :return:
         """
         if self.connection:
-            await self.exchange.publish(message, routing_key='')
+            raw_msg = aio_pika.Message(body=message.encode())
+            await self.exchange.publish(raw_msg, routing_key='')
         else:
             with open("./fallback.log", "a", encoding="utf-8") as file:
                 file.write(message + "\n")
