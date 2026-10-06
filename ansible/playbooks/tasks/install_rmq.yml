@@ -35,7 +35,7 @@
 - name: Create application user
   become: true
   community.rabbitmq.rabbitmq_user:
-    user: "{{ rmq_vhost }}"
+    user: "{{ rmq_app_user }}"
     password: "{{ rmq_app_password }}"
     update_password: always
     tags: ""
