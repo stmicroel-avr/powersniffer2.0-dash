@@ -47,7 +47,7 @@ class QueueClient:
         :return:
         """
         if self.connection:
-            await self.exchange.publish(message)
+            await self.exchange.publish(message, routing_key='')
         else:
             with open("./fallback.log", "a", encoding="utf-8") as file:
                 file.write(message + "\n")
