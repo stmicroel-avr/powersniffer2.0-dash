@@ -13,7 +13,7 @@ class Measurement:
     def to_json(self) -> str:
         return json.dumps({
             'key': str(uuid4()),
-            'timestamp': self.timestamp,
+            'timestamp': self.timestamp.isoformat(),
             'value': self.value,
             'unit': self.unit,
         })
