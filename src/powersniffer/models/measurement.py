@@ -12,7 +12,7 @@ class Measurement:
 
     def to_json(self) -> str:
         return json.dumps({
-            'key': uuid4(),
+            'key': str(uuid4()),
             'timestamp': self.timestamp,
             'value': self.value,
             'unit': self.unit,
