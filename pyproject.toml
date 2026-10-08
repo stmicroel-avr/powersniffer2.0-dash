@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [project.scripts]
-powersniffer-listener = "powersniffer.listener:entry"
+powersniffer-collector = "powersniffer.entrypoints.collector:entry"

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import tomllib
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)

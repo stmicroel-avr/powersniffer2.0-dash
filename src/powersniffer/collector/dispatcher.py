@@ -1,8 +1,7 @@
 import logging
 
 from powersniffer.queue_client import QueueClient
-from powersniffer.packet_parser import PacketParser
-from powersniffer.protocols import JsonSerializableEvent
+from powersniffer.collector.parser import PacketParser
 
 
 class EventDispatcher:
@@ -10,9 +9,6 @@ class EventDispatcher:
         self.parser = PacketParser(header)
         self.queue = queue_client
         self.logger = logging.getLogger(__name__)
-
-    def publish(self, payload: JsonSerializableEvent):
-        pass
 
     async def dispatch(self, ch, packet) -> None:
         """

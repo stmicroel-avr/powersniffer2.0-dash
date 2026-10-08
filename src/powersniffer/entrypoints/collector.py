@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from powersniffer.config import load_config, Config
 from powersniffer.bluetooth.client import Client
 from powersniffer.queue_client import QueueClient
-from powersniffer.event_dispatcher import EventDispatcher
+from powersniffer.collector.dispatcher import EventDispatcher
 
 logger = logging.getLogger(__name__)
 

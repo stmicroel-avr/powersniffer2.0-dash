@@ -5,7 +5,7 @@ from asyncio import CancelledError
 from powersniffer.config import DeviceConfig
 import powersniffer.bluetooth.exceptions as BTExceptions
 from bleak import BleakClient, BleakError, BleakScanner, BLEDevice
-from powersniffer.event_dispatcher import EventDispatcher
+from powersniffer.collector.dispatcher import EventDispatcher
 
 
 class Client:
