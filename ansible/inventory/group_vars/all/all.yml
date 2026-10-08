@@ -4,7 +4,7 @@ working_branch: main
 
 # UV packet manager settings
 uv_version: 0.12.21
-uv_listener_id: powersniffer-listener
+uv_collector_cmd_id: powersniffer-collector
 
 # Root directories path
 app_root: /opt/apps/psniffer-dash
