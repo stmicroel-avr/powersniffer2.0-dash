@@ -1,5 +1,6 @@
 - name: Deploy new app version
   hosts: raspberries
+  gather_facts: false
   tasks:
     - name: Get old app pid
       block:

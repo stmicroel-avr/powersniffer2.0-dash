@@ -1,10 +1,6 @@
-- name: Get current date
-  ansible.builtin.command: date "+{{releases_date_pattern}}"
-  register: current_date
-
 - name: Build release path
   ansible.builtin.set_fact:
-    release_path: "{{releases_dir}}/{{current_date.stdout}}"
+    release_path: "{{ releases_dir }}/{{ now(fmt=releases_date_pattern) }}"
 
 - name: Show release path
   ansible.builtin.debug:
