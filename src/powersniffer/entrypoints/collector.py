@@ -2,33 +2,26 @@ import sys
 import fcntl
 import signal
 import asyncio
-import logging
+from collections.abc import Iterator
 from contextlib import contextmanager
 
+from powersniffer.logger import get_app_logger
 from powersniffer.config import load_config, Config
 from powersniffer.bluetooth.client import Client
 from powersniffer.queue_client import QueueClient
 from powersniffer.collector.dispatcher import EventDispatcher
 
-logger = logging.getLogger(__name__)
-
-def configure_logging() -> None:
-    """
-    Configure logging for the application.
-    :return:
-    """
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(process)d] [%(levelname)s] %(asctime)s - %(message)s"
-    )
+logger = get_app_logger(__name__)
 
 @contextmanager
-def acquire_bluetooth_lock():
+def acquire_bluetooth_lock() -> Iterator[None]:
     """
     Acquire an exclusive flock-based lock for Bluetooth access.
 
     Concurrent access to the Bluetooth host is impossible. Blocks until the lock becomes available.
     Used during deployment of a new release, before the old instance is stopped.
+
+    :return: None
     """
     with open("/tmp/bluetooth.lock", "a") as f:
         logger.info("Acquiring lock...")
@@ -53,6 +46,12 @@ def soft_stop(sig, frame):
     sys.exit(0)
 
 async def run_async(config: Config) -> None:
+    """
+    All async task running.
+
+    :param config: Config
+    :return: None
+    """
     queue_client = QueueClient(config.rmq)
     await queue_client.start()
     bt = Client(
@@ -62,20 +61,18 @@ async def run_async(config: Config) -> None:
 
     await bt.run()
 
-def entry() -> None:
+def run() -> None:
     """
     Entry point for the application.
     Run via uv run
 
-    :return:
+    :return: None
     """
-    configure_logging()
     signal.signal(signal.SIGINT, soft_stop)
     signal.signal(signal.SIGTERM, soft_stop)
 
-    logger.info("Start app..")
+    logger.info("Start collector app..")
     with acquire_bluetooth_lock():
-        logger.info("Starting listener")
         config = load_config()
         logger.info(f"Scan all Bluetooth devices and search {config.device.name} with address: {config.device.addr}")
         asyncio.run(run_async(config))

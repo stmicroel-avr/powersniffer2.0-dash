@@ -13,4 +13,5 @@ dependencies = [
 ]
 
 [project.scripts]
-powersniffer-collector = "powersniffer.entrypoints.collector:entry"
+powersniffer-collector = "powersniffer.entrypoints.collector:run"
+powersniffer-storage-consumer = "powersniffer.entrypoints.storage_consumer:run"

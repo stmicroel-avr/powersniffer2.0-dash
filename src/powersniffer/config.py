@@ -15,6 +15,8 @@ class RMQConfig:
     exchange: str
     q_mongo: str
     vhost: str = '/'
+    failed_queue: str = 'failed_queue'
+    failed_exchange: str = 'failed_exchange'
 
 @dataclass(frozen=True)
 class Config:
