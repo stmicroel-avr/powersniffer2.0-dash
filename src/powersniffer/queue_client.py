@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import aio_pika
@@ -14,6 +15,8 @@ class QueueClient:
         self.failed_exchange = None
         self.connection = None
         self.queues = {}
+        self.consumer_tag_ids = {}
+        self.consumer_processing_task_count = 0
 
     async def _declare_and_bind_queue(self, queue_name: str, failed_exchange_name: str) -> None:
         """
@@ -72,8 +75,20 @@ class QueueClient:
         Stop the rmq client
         :return: None
         """
+        # Graceful shutdown
         if self.connection is not None:
-            await self.connection.close()
+            try:
+                # Stop consumers
+                for (consumer_tag_id, queue) in self.consumer_tag_ids.items():
+                    await self.queues[queue].cancel(consumer_tag_id, timeout=5)
+
+                # Wait for handle last message (predictive)
+                cycles = 0
+                while self.consumer_processing_task_count > 0 and cycles < 100:
+                    await asyncio.sleep(0.1)
+                    cycles += 1
+            finally:
+                await self.connection.close()
 
     async def publish(self, message: str) -> None:
         """
@@ -108,18 +123,23 @@ class QueueClient:
             :param msg: aio_pika.abc.AbstractIncomingMessage
             :return: None
             """
+            self.consumer_processing_task_count += 1
             try:
-                result = await callback(json.loads(msg.body))
-            except Exception as e:
-                with open("./consumer_error.log", "a", encoding="utf-8") as file:
-                    file.write(str(e) + "\n")
+                try:
+                    result = await callback(json.loads(msg.body))
+                except Exception as e:
+                    with open("./consumer_error.log", "a", encoding="utf-8") as file:
+                        file.write(str(e) + "\n")
 
-                return await msg.reject()
+                    return await msg.reject()
 
-            if result:
-                return await msg.ack()
+                if result:
+                    return await msg.ack()
 
-            return await msg.reject(requeue=True)
+                return await msg.reject(requeue=True)
+            finally:
+                self.consumer_processing_task_count -= 1
 
         await self.channel.set_qos(prefetch_count=prefetch)
-        await self.queues[queue].consume(on_message)
+        consumer_tag_id = await self.queues[queue].consume(on_message)
+        self.consumer_tag_ids[consumer_tag_id] = queue
