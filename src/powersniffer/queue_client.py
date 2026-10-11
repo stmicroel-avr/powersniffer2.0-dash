@@ -15,6 +15,7 @@ class QueueClient:
         self.failed_exchange = None
         self.connection = None
         self.queues = {}
+        self.stop_flag = False
         self.consumer_tag_ids = {}
         self.consumer_processing_task_count = 0
 
@@ -48,33 +49,40 @@ class QueueClient:
 
         :return: None
         """
-        self.connection = await aio_pika.connect_robust(
-            login=self.config.username,
-            password=self.config.password,
-            virtualhost=self.config.vhost,
-        )
+        while not self.stop_flag:
+            try:
+                self.connection = await aio_pika.connect_robust(
+                    login=self.config.username,
+                    password=self.config.password,
+                    virtualhost=self.config.vhost,
+                )
 
-        self.channel = await self.connection.channel()
-        self.exchange = await self.channel.declare_exchange(
-            self.config.exchange,
-            aio_pika.ExchangeType.FANOUT,
-            durable=True
-        )
+                self.channel = await self.connection.channel()
+                self.exchange = await self.channel.declare_exchange(
+                    self.config.exchange,
+                    aio_pika.ExchangeType.FANOUT,
+                    durable=True
+                )
 
-        self.failed_exchange = await self.channel.declare_exchange(
-            self.config.failed_exchange,
-            aio_pika.ExchangeType.FANOUT,
-            durable=True
-        )
+                self.failed_exchange = await self.channel.declare_exchange(
+                    self.config.failed_exchange,
+                    aio_pika.ExchangeType.FANOUT,
+                    durable=True
+                )
 
-        await self._declare_failed_queue(self.config.failed_queue)
-        await self._declare_and_bind_queue(self.config.q_mongo, self.config.failed_exchange)
+                await self._declare_failed_queue(self.config.failed_queue)
+                await self._declare_and_bind_queue(self.config.q_mongo, self.config.failed_exchange)
+                break
+            except ConnectionRefusedError, ConnectionResetError, TimeoutError:
+                await asyncio.sleep(3)
 
     async def stop(self) -> None:
         """
         Stop the rmq client
         :return: None
         """
+        self.stop_flag = True
+
         # Graceful shutdown
         if self.connection is not None:
             try:
