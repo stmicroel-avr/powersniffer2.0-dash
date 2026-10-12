@@ -4,6 +4,8 @@ import json
 import aio_pika
 from collections.abc import Callable, Awaitable
 
+from aiormq import AMQPConnectionError, ChannelInvalidStateError, ChannelClosed
+
 from powersniffer.config import RMQConfig
 
 
@@ -73,7 +75,22 @@ class QueueClient:
                 await self._declare_failed_queue(self.config.failed_queue)
                 await self._declare_and_bind_queue(self.config.q_mongo, self.config.failed_exchange)
                 break
-            except ConnectionRefusedError, ConnectionResetError, TimeoutError:
+            except (AMQPConnectionError, ConnectionError, TimeoutError) as e:
+                if isinstance(e, AMQPConnectionError) and type(e) is not AMQPConnectionError:
+                    raise
+
+                with open("./consumer_error.log", "a", encoding="utf-8") as file:
+                    file.write(f"{type(e).__name__}: {e}\n")
+
+                if self.connection is not None:
+                    await self.connection.close()
+                    self.connection = None
+
+                self.channel = None
+                self.exchange = None
+                self.failed_exchange = None
+                self.queues.clear()
+
                 await asyncio.sleep(3)
 
     async def stop(self) -> None:
@@ -105,10 +122,14 @@ class QueueClient:
         :param message:
         :return: None
         """
-        if self.connection:
+        try:
+            if not self.connection:
+                raise ConnectionError
+
             raw_msg = aio_pika.Message(body=message.encode(), delivery_mode=aio_pika.DeliveryMode.PERSISTENT)
-            await self.exchange.publish(raw_msg, routing_key='')
-        else:
+            async with asyncio.timeout(2):
+                await self.exchange.publish(raw_msg, routing_key='')
+        except (AMQPConnectionError, ChannelInvalidStateError, ConnectionError, TimeoutError) as e:
             with open("./fallback.log", "a", encoding="utf-8") as file:
                 file.write(message + "\n")
 
@@ -145,6 +166,9 @@ class QueueClient:
                     return await msg.ack()
 
                 return await msg.reject(requeue=True)
+            except (AMQPConnectionError, ChannelInvalidStateError, ChannelClosed):
+                with open("./consumer_error.log", "a", encoding="utf-8") as file:
+                    file.write(f"ack/reject failed: {type(e).__name__}: {e}\n")
             finally:
                 self.consumer_processing_task_count -= 1
 
