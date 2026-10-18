@@ -18,10 +18,17 @@ class RMQConfig:
     failed_queue: str = 'failed_queue'
     failed_exchange: str = 'failed_exchange'
 
+@dataclass
+class MongoConfig:
+    username: str
+    password: str
+    dbname: str
+
 @dataclass(frozen=True)
 class Config:
     device: DeviceConfig
     rmq: RMQConfig
+    mongo: MongoConfig
 
 
 def load_config(path: str = "config.toml") -> Config:
@@ -41,4 +48,9 @@ def load_config(path: str = "config.toml") -> Config:
             exchange=raw["rmq"]["exchange_name"],
             q_mongo=raw["rmq"]["q_mongo"],
         ),
+        mongo=MongoConfig(
+            username=raw["mongo"]["username"],
+            password=raw["mongo"]["password"],
+            dbname=raw["mongo"]["dbname"],
+        )
     )
