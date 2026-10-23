@@ -2,6 +2,7 @@ from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 
 from powersniffer.config import MongoConfig
+from powersniffer.consumers.storage.measurement_value_converter import MeasurementValueConverter
 from powersniffer.models.measurement import Measurement
 
 
@@ -28,10 +29,9 @@ class MongoMetricsWriter:
         self.client = AsyncMongoClient(username=self.config.username, password=self.config.password)
         self.db = AsyncDatabase(self.client, self.config.dbname)
 
-    async def write_metric(self, key: str, metric: Measurement):
+    async def write_metric(self, metric: Measurement):
         """
         Write metric to MongoDB
-        :param key: Key of metric
         :param metric: Metric data
         :return:
         """
@@ -47,6 +47,7 @@ class MongoMetricsWriter:
             )
 
         await self.collections[collection_name].insert_one({
-            'key': key,
-            'value': metric.value,
+            'timestamp': metric.timestamp,
+            'key': metric.key,
+            'value': MeasurementValueConverter(metric).resolve_value(),
         })
