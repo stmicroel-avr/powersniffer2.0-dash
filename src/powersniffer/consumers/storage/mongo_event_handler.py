@@ -12,12 +12,13 @@ class MongoEventHandler:
         self.logger = get_app_logger(__name__)
         self.event_adapter = TypeAdapter(Measurement)
 
-    async def handle(self, raw_event: dict) -> None:
+    async def handle(self, raw_event: dict) -> bool:
         try:
             measurement = self.event_adapter.validate_python(raw_event)
         except ValidationError as e:
             self.logger.error(e)
-            return
+            return True
 
         self.logger.info(measurement)
         await asyncio.sleep(1)
+        return True
