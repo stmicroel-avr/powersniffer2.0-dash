@@ -143,7 +143,7 @@ class QueueClient:
         :return: None
         """
         if queue not in self.queues:
-            raise RuntimeError(f"Queue {queue} not registered")
+            raise RuntimeError(f"register_consumerQueue {queue} not registered")
 
         async def on_message(msg: aio_pika.abc.AbstractIncomingMessage) -> None:
             """

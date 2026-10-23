@@ -10,13 +10,43 @@ class MongoMetricsWriter:
         self.db = None
         self.client = None
         self.config = config
+        self.collections = {}
+
+    def _get_collection_name(self, measurement: Measurement):
+        """
+        Get measurement collection name
+        :param measurement: Measurement data
+        :return:
+        """
+        return f'measurements_{measurement.unit}'
 
     def connect(self):
+        """
+        Register client and connect to MongoDB
+        :return:
+        """
         self.client = AsyncMongoClient(username=self.config.username, password=self.config.password)
         self.db = AsyncDatabase(self.client, self.config.dbname)
 
-    async def write(self, metric: Measurement):
+    async def write_metric(self, key: str, metric: Measurement):
+        """
+        Write metric to MongoDB
+        :param key: Key of metric
+        :param metric: Metric data
+        :return:
+        """
         if self.db is None:
             self.connect()
 
-        await self.db.insert_one(metric)
+        collection_name = self._get_collection_name(metric)
+
+        if collection_name not in self.collections:
+            self.collections[collection_name] = await self.db.create_collection(
+                collection_name,
+                timeseries={"timeField": "timestamp", "metaField": "metadata", "granularity": "seconds"}
+            )
+
+        await self.collections[collection_name].insert_one({
+            'key': key,
+            'value': metric.value,
+        })
