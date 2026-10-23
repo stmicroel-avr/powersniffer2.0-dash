@@ -20,6 +20,6 @@ class MongoEventHandler:
             return True
 
         self.logger.info(measurement)
-        self.storage_writer.write_metric(measurement)
+        await self.storage_writer.write_metric(measurement)
         await asyncio.sleep(1)
         return True
