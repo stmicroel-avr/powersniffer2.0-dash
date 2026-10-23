@@ -3,10 +3,8 @@ from uuid import uuid4
 from datetime import datetime
 
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
 
 
-@dataclass
 class Measurement(BaseModel):
     """Producer dto for any metrics"""
     timestamp: datetime
