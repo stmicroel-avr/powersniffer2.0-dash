@@ -39,7 +39,7 @@ async def start_consumer(config: Config) -> None:
         await client.register_consumer(config.rmq.q_mongo, processor.handle)
         await terminate_event.wait()
     finally:
-        logger.info("Stop consumer asynchronously")
+        logger.info("Stop consumer asynchronously..")
         await client.stop()
         logger.info("RMQ consumer stopped")
         log_stats_task.cancel()
