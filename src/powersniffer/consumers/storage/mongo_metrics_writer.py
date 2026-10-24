@@ -30,9 +30,12 @@ class MongoMetricsWriter:
         :return:
         """
         self.client = AsyncMongoClient(
+            host="localhost",
+            port=27017,
             username=self.config.username,
             password=self.config.password,
             minPoolSize=1,
+            authSource=self.config.dbname,
         )
 
         db = AsyncDatabase(self.client, self.config.dbname)
