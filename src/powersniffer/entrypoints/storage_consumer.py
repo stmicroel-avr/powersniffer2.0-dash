@@ -24,7 +24,7 @@ async def start_consumer(config: Config) -> None:
 
     # Connect to mongo
     mongo_writer = MongoMetricsWriter(config.mongo)
-    mongo_writer.connect()
+    await mongo_writer.init()
 
     # Initialize event handler
     processor = MongoEventHandler(mongo_writer)
