@@ -1,3 +1,4 @@
+from typing import Optional
 from pymongo import AsyncMongoClient
 from pymongo.errors import DuplicateKeyError
 from pymongo.asynchronous.database import AsyncDatabase
@@ -10,19 +11,12 @@ from powersniffer.models.measurement import Measurement
 
 class MongoMetricsWriter:
     def __init__(self, config: MongoConfig):
-        self.db = None
-        self.client = None
+        self.db: Optional[AsyncDatabase] = None
+        self.client: Optional[AsyncMongoClient] = None
         self.config = config
         self.collections = {}
+        self.stop_flag = False
         self.logger = get_app_logger(__name__)
-
-    def _get_collection_name(self, measurement: Measurement):
-        """
-        Get measurement collection name
-        :param measurement: Measurement data
-        :return:
-        """
-        return f'measurements_{measurement.unit.lower()}'
 
     async def init(self):
         """
@@ -42,12 +36,26 @@ class MongoMetricsWriter:
         await db.command('ping')
         self.db = db
 
+    async def stop(self) -> None:
+        """
+        Stop the mongo client
+        :return:
+        """
+        self.stop_flag = True
+        if self.client is None or self.db is None:
+            return
+
+        await self.client.close()
+
     async def write_metric(self, metric: Measurement) -> bool:
         """
         Write metric to MongoDB
         :param metric: Metric data
         :return:
         """
+        if self.stop_flag:
+            return False
+
         if self.db is None:
             self.logger.error('MongoDB not connected')
             return False
@@ -79,3 +87,11 @@ class MongoMetricsWriter:
             return False
 
         return True
+
+    def _get_collection_name(self, measurement: Measurement):
+        """
+        Get measurement collection name
+        :param measurement: Measurement data
+        :return:
+        """
+        return f'measurements_{measurement.unit.lower()}'
