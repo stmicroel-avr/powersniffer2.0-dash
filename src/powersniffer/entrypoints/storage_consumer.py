@@ -40,12 +40,12 @@ async def start_consumer(config: Config) -> None:
         await terminate_event.wait()
     finally:
         logger.info("Stop consumer asynchronously")
-        logger.info("RMQ consumer stopping..")
         await client.stop()
-        logger.info("Event handler stopping..")
+        logger.info("RMQ consumer stopped")
         log_stats_task.cancel()
-        logger.info("Mongo client stopping..")
+        logger.info("Event handler stopped")
         await mongo_writer.stop()
+        logger.info("Mongo client stopped")
 
 def run() -> None:
     """
