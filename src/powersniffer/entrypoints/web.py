@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-app.frontend("/", directory="web")
+app.frontend("/", directory="dist")
 
 @app.get("/api")
 async def read_root():

@@ -20,7 +20,6 @@ htmlcov/
 
 # Build / packaging
 build/
-dist/
 *.egg-info/
 
 # IDE
