@@ -1,0 +1,48 @@
+/* Chart containers */
+#load-voltage-chart,
+#load-current-chart,
+#battery-voltage-chart {
+  width: 100%;
+  height: 180px;
+}
+
+/* Keep measurements aligned as values change */
+output,
+#selected-range,
+#session-start,
+#session-end,
+#session-duration,
+#session-count,
+#incoming-data {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Incoming measurements */
+#incoming-data {
+  max-height: 620px;
+  overflow-y: auto;
+  overflow-anchor: none;
+  scrollbar-width: thin;
+}
+
+#incoming-data > :first-child {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* Device dialog */
+#device-dialog {
+  width: min(420px, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  overflow-y: auto;
+}
+
+#device-dialog::backdrop {
+  background-color: rgb(0 0 0 / 35%);
+}
+
+/* Incoming data moves below the charts on smaller screens */
+@media (max-width: 991.98px) {
+  #incoming-data {
+    max-height: 320px;
+  }
+}
