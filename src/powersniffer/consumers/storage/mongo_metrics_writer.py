@@ -80,7 +80,7 @@ class MongoMetricsWriter:
                 'value': MeasurementValueConverter(metric).resolve_value(),
             })
         except DuplicateKeyError as e:
-            self.logger.debug(f'Duplicate key {e}')
+            self.logger.info(f'Duplicate key {e}')
             return True
         except Exception as e:
             self.logger.error(f'Unknown error {e}')
