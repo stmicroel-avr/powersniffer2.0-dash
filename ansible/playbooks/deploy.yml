@@ -1,27 +1,29 @@
 - name: Deploy new app version
   hosts: raspberries
   gather_facts: false
+  vars:
+    valid_old_pids: []
   tasks:
-    - name: Get old app pid
+    - name: Get old apps pid
       block:
-        - name: Read old app pid
-          ansible.builtin.command: cat app.pid
-          register: pid_cmd
+        - name: Read old pid
+          ansible.builtin.command: "cat {{item}}.pid"
+          loop: "{{ entrypoints }}"
+          loop_control:
+            label: "{{ item }}"
+          register: old_pids_cmd_outs
           args:
             chdir: "{{ active_release_link }}"
+          failed_when: false
 
-        - name: Show old app pid
-          ansible.builtin.debug:
-            msg: "{{pid_cmd.stdout}}"
-
-        - name: Register old pid as var
+        # Append when pid correct
+        - name: Append valid old PIDs
           ansible.builtin.set_fact:
-            old_pid: "{{pid_cmd.stdout}}"
-
-        - name: Check old pid format
-          ansible.builtin.debug:
-            msg: "Old PID {{old_pid}} is not valid!"
-          when: (old_pid | regex_search("^\d+$")) != old_pid
+            valid_old_pids: "{{ valid_old_pids + [item.stdout] }}"
+          loop: "{{ old_pids_cmd_outs.results }}"
+          when:
+            - item.rc == 0
+            - (item.stdout | regex_search('^[0-9]+$')) == item.stdout
 
     - name: Gen release path
       ansible.builtin.include_tasks: tasks/gen_release_path.yml
@@ -48,10 +50,10 @@
     - name: Run new app instance
       ansible.builtin.include_tasks: tasks/run_app.yml
 
-    - name: Stop old instance
+    - name: Stop old instances
       ansible.builtin.shell:
-        cmd: "kill {{old_pid}}"
+        cmd: "kill {{item}}"
+      loop: "{{ valid_old_pids }}"
       args:
         executable: /bin/bash
       failed_when: false
-      when: (old_pid | regex_search("^\d+$")) == old_pid

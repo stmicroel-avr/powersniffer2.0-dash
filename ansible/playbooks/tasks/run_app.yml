@@ -6,8 +6,9 @@
 
 - name: Start new app instance
   ansible.builtin.shell: |
-    nohup "$HOME/.local/bin/uv" run {{uv_collector_cmd_id}} > app.log 2>&1 &
-    echo $! > app.pid
+    nohup "$HOME/.local/bin/uv" run {{item}} > {{item}}.log 2>&1 &
+    echo $! > {{item}}.pid
+  loop: "{{ entrypoints }}"
   args:
     chdir: "{{ active_release_link }}"
     executable: /bin/bash

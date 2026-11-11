@@ -15,6 +15,6 @@ dependencies = [
 ]
 
 [project.scripts]
-powersniffer-web = "powersniffer.entrypoints.web:run"
-powersniffer-collector = "powersniffer.entrypoints.collector:run"
-powersniffer-storage-consumer = "powersniffer.entrypoints.storage_consumer:run"
+web = "powersniffer.entrypoints.web:run"
+collector = "powersniffer.entrypoints.collector:run"
+storage_consumer = "powersniffer.entrypoints.storage_consumer:run"
