@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 
 from powersniffer.config import load_config
 from powersniffer.web.dependencies import get_db
+from powersniffer.web.queries import get_measurements
 from powersniffer.web.dto import MeasurementQueryParams
 
 @asynccontextmanager
@@ -42,7 +43,7 @@ async def get_measurements(
         filter_query: Annotated[MeasurementQueryParams, Query()],
         db: Annotated[AsyncDatabase, Depends(get_db)]
 ):
-    return await db.command("ping")
+    return await get_measurements(db, filter_query)
 
 @app.get("/health")
 async def health_check():
