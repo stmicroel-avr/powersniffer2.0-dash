@@ -44,7 +44,7 @@ async def get_measurements(
 ):
     return await db.command("ping")
 
-@app.post("/health")
+@app.get("/health")
 async def health_check():
     return {"status": "ok"}
 
