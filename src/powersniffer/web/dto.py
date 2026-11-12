@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, model_validator
 
 
-class MeasurementQueryParams(BaseModel):
+class MeasurementParams(BaseModel):
     date_from: datetime
     date_to: datetime | None = None
 
@@ -11,3 +11,11 @@ class MeasurementQueryParams(BaseModel):
         if self.date_to and self.date_from > self.date_to:
             raise ValueError('Date from must be before date')
         return self
+
+class MeasurementItemResponse(BaseModel):
+    key: str
+    value: float
+    timestamp: datetime
+
+class MeasurementsResponse(BaseModel):
+    items: list[MeasurementItemResponse]
