@@ -1,3 +1,5 @@
+import time
+import socket
 import uvicorn
 from fastapi import FastAPI, Query, Depends
 from pymongo import AsyncMongoClient
@@ -42,6 +44,24 @@ async def get_measurements(
 ):
     return await db.command("ping")
 
+@app.post("/health")
+async def health_check():
+    return {"status": "ok"}
+
+def wait_for_port(host: str, port: int) -> None:
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind((host, port))
+                return
+            except OSError as e:
+                if e.errno != 98:  # EADDRINUSE
+                    raise
+
+        print(f"Port {port} is busy, waiting...")
+        time.sleep(0.5)
+
 
 def run():
+    wait_for_port(host="localhost", port=8001)
     uvicorn.run(app, host="0.0.0.0", port=8001)
