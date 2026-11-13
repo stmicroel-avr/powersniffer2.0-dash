@@ -2,18 +2,48 @@
   ansible.builtin.get_url:
     url: "{{mongodb_deb_link}}"
     dest: /tmp/mongodb.deb
+    checksum: "sha256:9768bec133794a2b5095d7ce82764ca0419cd4d8460b7dc3fd6fcfb3ae66318a"
 
-- name: Install a .deb package
+- name: Install .deb package
   become: true
   ansible.builtin.apt:
     deb: /tmp/mongodb.deb
 
-- name: Enable as service and start
+- name: Create MongoDB service
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/mongod.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=MongoDB Database Server
+      After=network.target
+
+      [Service]
+      User=mongodb
+      Group=mongodb
+      ExecStart=/usr/bin/mongod --config /etc/mongod.conf
+      Restart=on-failure
+      LimitNOFILE=64000
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable MongoDB service and start
   become: true
   ansible.builtin.systemd_service:
+    name: mongod
+    daemon_reload: true
     enabled: true
     state: started
-    name: mongod
+
+- name: Wait for MongoDB to accept connections
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 27017
+    timeout: 60
 
 - name: Install PyMongo
   become: true
