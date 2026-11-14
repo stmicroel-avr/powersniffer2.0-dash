@@ -32,5 +32,14 @@ const updateMeasurements = (type, items) => {
     dashboard.setMeasurements(type, items);
 };
 
+const ws_init = () => {
+    let ws = new WebSocket('/ws');
+    ws.addEventListener(
+        "message",
+        (e) => console.log(`Message from server ${e.data?.msg ? e.data.msg : e.data}`)
+    );
+};
+
 dashboard.addEventListener('rangechange', (e) => load(e.detail));
 dashboard.initRange();
+ws_init();

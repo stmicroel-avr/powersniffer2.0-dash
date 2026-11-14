@@ -1,7 +1,7 @@
 import time
 import socket
 import uvicorn
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query, Depends, WebSocket, WebSocketDisconnect
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 from typing_extensions import Annotated
@@ -11,11 +11,13 @@ from powersniffer.config import load_config
 from powersniffer.web.dependencies import get_db
 from powersniffer.web.dto import MeasurementParams, MeasurementsResponse
 from powersniffer.web.queries import find_measurements
+from powersniffer.web.websocket import WebSocketPool
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(engine: FastAPI):
     config = load_config().mongo
-    client = AsyncMongoClient(
+    mongo = AsyncMongoClient(
         host="localhost",
         port=27017,
         username=config.username,
@@ -24,23 +26,34 @@ async def lifespan(app: FastAPI):
         authSource=config.dbname,
     )
 
-    db = AsyncDatabase(client, config.dbname)
+    db = AsyncDatabase(mongo, config.dbname)
     await db.command('ping')
-    app.state.db = db
+    engine.state.db = db
+    engine.state.websocket_pool = WebSocketPool()
 
     try:
         yield
     finally:
-        await client.close()
+        await mongo.close()
 
 
 app = FastAPI(lifespan=lifespan)
-
 app.frontend("/", directory="dist")
 
 @app.get("/api/v1/measurements/{unit}", response_model=MeasurementsResponse)
 async def get_measurements(unit: str, query: Annotated[MeasurementParams, Query()], db: Annotated[AsyncDatabase, Depends(get_db)]):
     return MeasurementsResponse(items=await find_measurements(db, unit, query))
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    app.state.websocket_pool.register(websocket)
+    try:
+        await websocket.send_json({"msg": "WS alive"})
+        while True: await websocket.receive_text()
+    except WebSocketDisconnect: pass
+    finally:
+        app.state.websocket_pool.unregister(websocket)
 
 @app.get("/health")
 async def health_check():
