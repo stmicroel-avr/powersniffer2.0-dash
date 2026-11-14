@@ -7,7 +7,7 @@ const load = (params) => {
     };
 
     for(let key in measurements) {
-        if (key !== undefined) {
+        if (key === undefined) {
             continue;
         }
         fetch(`api/v1/measurements/v?date_from=${params?.from}&date_to=${params.to}`)
