@@ -1,1 +1,1 @@
-const dashboard = PowerSnifferDashboard();
+const dashboard = new PowerSnifferDashboard();
