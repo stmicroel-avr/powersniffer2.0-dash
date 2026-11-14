@@ -36,7 +36,15 @@ const ws_init = () => {
     let ws = new WebSocket('/ws');
     ws.addEventListener(
         "message",
-        (e) => console.log(`Message from server ${e.data?.msg ? e.data.msg : e.data}`)
+        (e) => {
+            try {
+                const json = JSON.parse(e.data);
+                console.log(`Message from server ${json?.msg ? json.msg : json}`);
+            } catch (e) {
+                console.log("Error parsing msg. Original from server", e.data);
+            }
+
+        }
     );
 };
 
