@@ -92,6 +92,7 @@ class PowerSnifferDashboard {
       }
     });
 
+    this.setRange(15);
     this.renderCharts();
   }
 
@@ -177,6 +178,11 @@ class PowerSnifferDashboard {
   setRange(minutes) {
     const to = new Date();
     const from = new Date(to.getTime() - (1000 * 60 * minutes));
-    console.log('from: ' + from.toString() + ' to: ' + to.toString());
+    this.rangeTo.value =
+        `${to.getFullYear()}-${String(to.getMonth()+1).padStart(2,"0")}-${String(to.getDate()).padStart(2,"0")}` +
+        `T${String(to.getHours()).padStart(2, "0")}:${String(to.getMinutes()).padStart(2, "0")}`;
+    this.rangeFrom.value =
+        `${from.getFullYear()}-${String(from.getMonth()+1).padStart(2,"0")}-${String(from.getDate()).padStart(2,"0")}` +
+        `T${String(from.getHours()).padStart(2, "0")}:${String(from.getMinutes()).padStart(2, "0")}`;
   }
 }
