@@ -200,8 +200,10 @@ class PowerSnifferDashboard extends EventTarget {
 
   applyRange() {
     this.dispatchEvent(new CustomEvent("rangechange", {
-      from: this.rangeFrom.value,
-      to: this.rangeTo.value,
+      detail: {
+        from: this.rangeFrom.value,
+        to: this.rangeTo.value
+      },
     }));
   }
 }
