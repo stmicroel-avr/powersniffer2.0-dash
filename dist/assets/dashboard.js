@@ -5,6 +5,8 @@ class PowerSnifferDashboard {
 
     this.liveInput = document.getElementById("live");
     this.feed = document.getElementById("incoming-data");
+    this.rangeFrom = document.getElementById('range-from');
+    this.rangeTo = document.getElementById('range-to');
 
     this.metrics = {
       voltage: {
