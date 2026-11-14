@@ -1,5 +1,7 @@
-class PowerSnifferDashboard {
+class PowerSnifferDashboard extends EventTarget {
   constructor() {
+    super();
+
     this.windowMs = 5 * 60 * 1000;
     this.latestTime = Date.now();
 
@@ -73,6 +75,15 @@ class PowerSnifferDashboard {
       });
     }
 
+    this.addEventListeners();
+    this.renderCharts();
+  }
+
+  initRange() {
+    this.setRange(15);
+  }
+
+  addEventListeners() {
     this.liveInput.addEventListener("change", () => {
       if (this.liveInput.checked) {
         this.renderCharts();
@@ -92,8 +103,8 @@ class PowerSnifferDashboard {
       }
     });
 
-    this.setRange(15);
-    this.renderCharts();
+    this.rangeFrom.addEventListener("change", () => this.applyRange());
+    this.rangeTo.addEventListener("change", () => this.applyRange());
   }
 
   addMeasurement({ type, date, value }) {
@@ -184,5 +195,13 @@ class PowerSnifferDashboard {
     this.rangeFrom.value =
         `${from.getFullYear()}-${String(from.getMonth()+1).padStart(2,"0")}-${String(from.getDate()).padStart(2,"0")}` +
         `T${String(from.getHours()).padStart(2, "0")}:${String(from.getMinutes()).padStart(2, "0")}`;
+    this.applyRange();
+  }
+
+  applyRange() {
+    this.dispatchEvent(new CustomEvent("rangechange", {
+      from: this.rangeFrom.value,
+      to: this.rangeTo.value,
+    }));
   }
 }
