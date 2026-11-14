@@ -196,6 +196,18 @@ class PowerSnifferDashboard extends EventTarget {
         `${from.getFullYear()}-${String(from.getMonth()+1).padStart(2,"0")}-${String(from.getDate()).padStart(2,"0")}` +
         `T${String(from.getHours()).padStart(2, "0")}:${String(from.getMinutes()).padStart(2, "0")}`;
     this.applyRange();
+
+    for(let type in this.metrics) {
+      this
+          .metrics[type]
+          .chart
+          .setOption({
+            xAxis: {
+              min: from,
+              max: to
+            }
+          });
+    }
   }
 
   applyRange() {
