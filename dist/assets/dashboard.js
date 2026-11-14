@@ -7,6 +7,7 @@ class PowerSnifferDashboard {
     this.feed = document.getElementById("incoming-data");
     this.rangeFrom = document.getElementById('range-from');
     this.rangeTo = document.getElementById('range-to');
+    this.rangeGroup = document.getElementsByName('time-range');
 
     this.metrics = {
       voltage: {
@@ -77,6 +78,13 @@ class PowerSnifferDashboard {
         this.renderCharts();
       }
     });
+
+    this
+        .rangeGroup
+        .forEach((el) => el.addEventListener(
+            'click',
+            (el) => this.setRange(el.target.value)
+        ));
 
     window.addEventListener("resize", () => {
       for (const metric of Object.values(this.metrics)) {
@@ -164,5 +172,11 @@ class PowerSnifferDashboard {
     while (this.feed.children.length > 50) {
       this.feed.lastElementChild.remove();
     }
+  }
+
+  setRange(minutes) {
+    const to = new Date();
+    const from = new Date(to.getTime() - (1000 * 60 * minutes));
+    console.log('from: ' + from.toDateString() + ' to: ' + to.toDateString());
   }
 }
