@@ -10,7 +10,7 @@ const load = (params) => {
         if (key === undefined) {
             continue;
         }
-        fetch(`api/v1/measurements/v?date_from=${params?.from}&date_to=${params.to}`)
+        fetch(`api/v1/measurements/${key}?date_from=${params?.from}&date_to=${params.to}`)
             .then((response) => response.json())
             .then((payload) => updateMeasurements(measurements[key], payload?.items));
     }
