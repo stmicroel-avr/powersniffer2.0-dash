@@ -29,7 +29,7 @@ const updateMeasurements = (type, items) => {
         };
     });
 
-    dashboard.setMeasurements(items);
+    dashboard.setMeasurements(type, items);
 };
 
 dashboard.addEventListener('rangechange', (e) => load(e.detail));
