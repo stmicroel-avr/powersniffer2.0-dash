@@ -107,7 +107,7 @@ class PowerSnifferDashboard extends EventTarget {
     this.rangeTo.addEventListener("change", () => this.applyRange());
   }
 
-  addMeasurement({ type, date, value }) {
+  addLiveMeasurement({ type, date, value }) {
     const metric = this.metrics[type];
 
     if (!metric) return;
@@ -137,6 +137,50 @@ class PowerSnifferDashboard extends EventTarget {
     if (this.liveInput.checked) {
       this.renderCharts();
     }
+  }
+
+  setMeasurements(items) {
+    const from = new Date(this.rangeFrom.value).getTime();
+    const to = new Date(this.rangeTo.value).getTime();
+
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to) {
+      return;
+    }
+
+    // Historical data should stay in the selected range.
+    this.liveInput.checked = false;
+
+    for (const metric of Object.values(this.metrics)) {
+      metric.points = [];
+    }
+
+    for (const { type, date, value } of items) {
+      const metric = this.metrics[type];
+      const timestamp = new Date(date).getTime();
+
+      if (!metric || !Number.isFinite(timestamp) || !Number.isFinite(value)) {
+        continue;
+      }
+
+      metric.points.push([timestamp, value]);
+    }
+
+    for (const metric of Object.values(this.metrics)) {
+      metric.points.sort((a, b) => a[0] - b[0]);
+
+      metric.chart.setOption({
+        xAxis: {
+          min: from,
+          max: to
+        },
+        series: [{
+          data: metric.points
+        }]
+      });
+    }
+
+    document.getElementById("selected-range").textContent =
+      `${new Date(from).toLocaleString()} — ${new Date(to).toLocaleString()}`;
   }
 
   renderCharts() {

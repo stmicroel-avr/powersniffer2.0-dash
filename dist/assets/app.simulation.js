@@ -29,19 +29,19 @@ function simulateMeasurements() {
   const batteryVoltage =
     4.05 - current * 0.15 + (Math.random() - 0.5) * 0.02;
 
-  dashboard.addMeasurement({
+  dashboard.addLiveMeasurement({
     type: "voltage",
     date: now,
     value: voltage
   });
 
-  dashboard.addMeasurement({
+  dashboard.addLiveMeasurement({
     type: "current",
     date: now,
     value: current
   });
 
-  dashboard.addMeasurement({
+  dashboard.addLiveMeasurement({
     type: "battery_voltage",
     date: now,
     value: batteryVoltage

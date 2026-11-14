@@ -21,11 +21,15 @@ const updateMeasurements = (type, items) => {
         return;
     }
 
-    items.forEach((item) => dashboard.addMeasurement({
-        type: type,
-        date: new Date(item?.timestamp),
-        value: item?.value,
-    }));
+    items = items.map((item) => {
+        return {
+            type: type,
+            date: new Date(item?.timestamp),
+            value: item?.value,
+        };
+    });
+
+    dashboard.setMeasurements(items);
 };
 
 dashboard.addEventListener('rangechange', (e) => load(e.detail));
