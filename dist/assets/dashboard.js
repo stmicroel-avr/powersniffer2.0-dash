@@ -177,6 +177,6 @@ class PowerSnifferDashboard {
   setRange(minutes) {
     const to = new Date();
     const from = new Date(to.getTime() - (1000 * 60 * minutes));
-    console.log('from: ' + from.toDateString() + ' to: ' + to.toDateString());
+    console.log('from: ' + from.toString() + ' to: ' + to.toString());
   }
 }
