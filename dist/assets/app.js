@@ -1,11 +1,10 @@
 const dashboard = new PowerSnifferDashboard();
+const measurements = {
+    'v': 'voltage',
+    'a': 'current',
+    'vcc': 'battery_voltage',
+};
 const load = (params) => {
-    const measurements = {
-        'v': 'voltage',
-        'a': 'current',
-        'vcc': 'battery_voltage',
-    };
-
     for(let key in measurements) {
         if (key === undefined) {
             continue;
@@ -39,7 +38,13 @@ const wsInit = () => {
         (e) => {
             try {
                 const json = JSON.parse(e.data);
-                console.log(json);
+                if (json.timestamp !== undefined && json.value !== undefined && json.unit !== undefined) {
+                    dashboard.addLiveMeasurement({
+                        type: measurements[json.unit.toLowerCase()],
+                        date: new Date(json.timestamp),
+                        value: json.value,
+                    })
+                }
             } catch (e) {
                 console.log("Error parsing msg. Original from server", e.data);
             }
