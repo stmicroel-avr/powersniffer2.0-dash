@@ -1,5 +1,6 @@
 from pydantic import TypeAdapter, ValidationError
 
+from powersniffer.consumers.storage.measurement_value_converter import MeasurementValueConverter
 from powersniffer.logger import get_app_logger
 from powersniffer.models.measurement import Measurement
 from powersniffer.web.websocket import WebSocketPool
@@ -31,7 +32,12 @@ class WebSocketEventHandler:
             measurement.unit,
         )
 
-        await self.pool.broadcast(measurement.to_dict())
+        await self.pool.broadcast({
+            'unit': measurement.unit,
+            'timestamp': measurement.timestamp,
+            'key': measurement.key,
+            'value': MeasurementValueConverter(measurement).resolve_value(),
+        })
 
         return True
 
