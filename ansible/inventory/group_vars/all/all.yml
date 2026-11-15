@@ -27,6 +27,7 @@ rmq_vhost: psniffer
 rmq_app_user: psniffer-user
 rmq_app_exchange_name: psniffer-ex
 rmq_app_mongo_queue: psniffer-q-mongo
+rmq_app_websocket_queue: psniffer-q-ws
 
 # MongoDB
 mongodb_deb_link: "https://apt.glennr.nl/repo/pool/mongod/8.0/m/mongod-armv8/bookworm-mongod-armv8_8.0.38_arm64.deb"

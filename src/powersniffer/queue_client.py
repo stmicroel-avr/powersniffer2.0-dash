@@ -73,7 +73,8 @@ class QueueClient:
                 )
 
                 await self._declare_failed_queue(self.config.failed_queue)
-                await self._declare_and_bind_queue(self.config.q_mongo, self.config.failed_exchange)
+                for queue in self.config.queues:
+                    await self._declare_and_bind_queue(queue, self.config.failed_exchange)
                 break
             except (AMQPConnectionError, ConnectionError, TimeoutError) as e:
                 if isinstance(e, AMQPConnectionError) and type(e) is not AMQPConnectionError:

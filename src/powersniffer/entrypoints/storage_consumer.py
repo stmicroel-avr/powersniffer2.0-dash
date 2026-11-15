@@ -36,7 +36,7 @@ async def start_consumer(config: Config) -> None:
     log_stats_task = asyncio.create_task(processor.run_loop_log_stats())
     try:
         await client.start()
-        await client.register_consumer(config.rmq.q_mongo, processor.handle)
+        await client.register_consumer(config.rmq_queue.q_mongo, processor.handle)
         await terminate_event.wait()
     finally:
         logger.info("Stop consumer asynchronously..")

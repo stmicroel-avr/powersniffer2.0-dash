@@ -8,34 +8,51 @@ from typing_extensions import Annotated
 from contextlib import asynccontextmanager
 
 from powersniffer.config import load_config
+from powersniffer.logger import get_app_logger
+from powersniffer.queue_client import QueueClient
 from powersniffer.web.dependencies import get_db
 from powersniffer.web.dto import MeasurementParams, MeasurementsResponse
 from powersniffer.web.queries import find_measurements
 from powersniffer.web.websocket import WebSocketPool
+from powersniffer.web.ws_event_handler import WebSocketEventHandler
 
+logger = get_app_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(engine: FastAPI):
-    config = load_config().mongo
+    logger.info("Starting lifespan")
+    config = load_config()
+
+    # Websocket
+    logger.info("Create websocket pool..")
+    engine.state.websocket_pool = WebSocketPool()
+
+    # MongoDB connect
+    logger.info("Starting mongo..")
     mongo = AsyncMongoClient(
         host="localhost",
         port=27017,
-        username=config.username,
-        password=config.password,
         minPoolSize=1,
-        authSource=config.dbname,
+        username=config.mongo.username,
+        password=config.mongo.password,
+        authSource=config.mongo.dbname,
     )
-
-    db = AsyncDatabase(mongo, config.dbname)
+    db = AsyncDatabase(mongo, config.mongo.dbname)
     await db.command('ping')
     engine.state.db = db
-    engine.state.websocket_pool = WebSocketPool()
+
+    # RabbitMQ connect
+    processor = WebSocketEventHandler(engine.state.websocket_pool)
+    engine.state.rmq = QueueClient(config.rmq)
+    await engine.state.rmq.start()
+    await engine.state.rmq.register_consumer(config.rmq_queue.q_ws, processor.handle)
 
     try:
+        logger.info("App state initialized")
         yield
     finally:
         await mongo.close()
-
+        await engine.state.rmq.stop()
 
 app = FastAPI(lifespan=lifespan)
 app.frontend("/", directory="dist")
@@ -49,7 +66,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     app.state.websocket_pool.register(websocket)
     try:
-        await websocket.send_json({"msg": "WS alive"})
+        await websocket.send_json({"msg": "WebSocket alive"})
         while True: await websocket.receive_text()
     except WebSocketDisconnect: pass
     finally:
@@ -69,7 +86,7 @@ def wait_for_port(host: str, port: int) -> None:
                 if e.errno != 98:  # EADDRINUSE
                     raise
 
-        print(f"Port {port} is busy, waiting...")
+        logger.warning(f"Port {port} is busy, waiting...")
         time.sleep(0.5)
 
 

@@ -32,14 +32,14 @@ const updateMeasurements = (type, items) => {
     dashboard.setMeasurements(type, items);
 };
 
-const ws_init = () => {
+const wsInit = () => {
     let ws = new WebSocket('/ws');
     ws.addEventListener(
         "message",
         (e) => {
             try {
                 const json = JSON.parse(e.data);
-                console.log(`Message from server ${json?.msg ? json.msg : json}`);
+                console.log(json);
             } catch (e) {
                 console.log("Error parsing msg. Original from server", e.data);
             }
@@ -50,4 +50,4 @@ const ws_init = () => {
 
 dashboard.addEventListener('rangechange', (e) => load(e.detail));
 dashboard.initRange();
-ws_init();
+wsInit();

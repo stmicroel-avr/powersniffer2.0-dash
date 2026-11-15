@@ -13,10 +13,15 @@ class RMQConfig:
     username: str
     password: str
     exchange: str
-    q_mongo: str
+    queues: dict
     vhost: str = '/'
     failed_queue: str = 'failed_queue'
     failed_exchange: str = 'failed_exchange'
+
+@dataclass
+class RMQQueues:
+    q_ws: str
+    q_mongo: str
 
 @dataclass
 class MongoConfig:
@@ -28,6 +33,7 @@ class MongoConfig:
 class Config:
     device: DeviceConfig
     rmq: RMQConfig
+    rmq_queue: RMQQueues
     mongo: MongoConfig
 
 
@@ -46,6 +52,10 @@ def load_config(path: str = "config.toml") -> Config:
             username=raw["rmq"]["username"],
             password=raw["rmq"]["password"],
             exchange=raw["rmq"]["exchange_name"],
+            queues=raw["rmq"]["queues"],
+        ),
+        rmq_queue=RMQQueues(
+            q_ws=raw["rmq"]["q_ws"],
             q_mongo=raw["rmq"]["q_mongo"],
         ),
         mongo=MongoConfig(

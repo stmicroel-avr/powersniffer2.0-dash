@@ -12,10 +12,13 @@ class Measurement(BaseModel):
     unit: str
     key: str = Field(default_factory=lambda: str(uuid4()))
 
-    def to_json(self) -> str:
-        return json.dumps({
+    def to_dict(self) -> dict:
+        return {
             'key': self.key,
             'timestamp': self.timestamp.isoformat(),
             'value': self.value,
             'unit': self.unit,
-        })
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
