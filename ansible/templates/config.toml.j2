@@ -10,7 +10,7 @@ password = "{{ rmq_app_password }}"
 exchange_name = "{{ rmq_app_exchange_name }}"
 q_mongo = "{{ rmq_app_mongo_queue }}"
 ws_mongo = "{{ rmq_app_websocket_queue }}"
-queue = [
+queues = [
     "{{ rmq_app_mongo_queue }}",
     "{{ rmq_app_websocket_queue }}",
 ]
