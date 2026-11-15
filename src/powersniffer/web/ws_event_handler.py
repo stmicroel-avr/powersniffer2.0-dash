@@ -34,7 +34,7 @@ class WebSocketEventHandler:
 
         await self.pool.broadcast({
             'unit': measurement.unit,
-            'timestamp': measurement.timestamp,
+            'timestamp': measurement.timestamp.isoformat(),
             'key': measurement.key,
             'value': MeasurementValueConverter(measurement).resolve_value(),
         })
