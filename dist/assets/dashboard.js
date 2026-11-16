@@ -13,7 +13,7 @@ class PowerSnifferDashboard extends EventTarget {
     this.status = document.getElementById("load-status");
     this.rangeGroup = document.getElementsByName('time-range');
     this.groupTimeRange = document.getElementById('group-time-range');
-    this.rangeForm = document.getElementById('range-form');
+    this.rangeFormGroup = document.getElementById('range-form-group');
 
     this.metrics = {
       voltage: {
@@ -90,11 +90,11 @@ class PowerSnifferDashboard extends EventTarget {
   addEventListeners() {
     this.liveInput.addEventListener("change", () => {
       if (this.liveInput.checked) {
-        this.rangeForm.classList.add('d-none');
+        this.rangeFormGroup.classList.add('d-none');
         this.groupTimeRange.classList.add('d-none');
         this.renderCharts();
       } else {
-        this.rangeForm.classList.remove('d-none');
+        this.rangeFormGroup.classList.remove('d-none');
         this.groupTimeRange.classList.remove('d-none');
       }
     });
