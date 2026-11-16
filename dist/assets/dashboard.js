@@ -12,6 +12,8 @@ class PowerSnifferDashboard extends EventTarget {
     this.rangeTo = document.getElementById('range-to');
     this.status = document.getElementById("load-status");
     this.rangeGroup = document.getElementsByName('time-range');
+    this.groupTimeRange = document.getElementById('group-time-range');
+    this.rangeForm = document.getElementById('range-form');
 
     this.metrics = {
       voltage: {
@@ -88,7 +90,12 @@ class PowerSnifferDashboard extends EventTarget {
   addEventListeners() {
     this.liveInput.addEventListener("change", () => {
       if (this.liveInput.checked) {
+        this.rangeForm.classList.add('d-none');
+        this.groupTimeRange.classList.add('d-none');
         this.renderCharts();
+      } else {
+        this.rangeForm.classList.remove('d-none');
+        this.groupTimeRange.classList.remove('d-none');
       }
     });
 
@@ -134,7 +141,6 @@ class PowerSnifferDashboard extends EventTarget {
     }
 
     this.setLiveAlive();
-    this.updateLoadStatus();
     this.addFeedItem(metric, timestamp, value);
 
     if (this.liveInput.checked) {
@@ -206,15 +212,8 @@ class PowerSnifferDashboard extends EventTarget {
       });
     }
 
-    document.getElementById("selected-range").textContent =
+     document.getElementById("selected-range").textContent =
       `${new Date(from).toLocaleString()} — ${new Date(to).toLocaleString()}`;
-  }
-
-  updateLoadStatus() {
-    const connected = !this.lastLiveActivity || ((Date.now() - this.lastLiveActivity) < 10000);
-    this.status.textContent = connected ? "Connected" : "Disconnected";
-    this.status.classList.toggle("text-bg-success", connected);
-    this.status.classList.toggle("text-bg-secondary", !connected);
   }
 
   setLiveAlive() {
