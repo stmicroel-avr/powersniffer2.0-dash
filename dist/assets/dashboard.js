@@ -4,11 +4,13 @@ class PowerSnifferDashboard extends EventTarget {
 
     this.windowMs = 5 * 60 * 1000;
     this.latestTime = Date.now();
+    this.aliveTimeoutId = null;
 
     this.liveInput = document.getElementById("live");
     this.feed = document.getElementById("incoming-data");
     this.rangeFrom = document.getElementById('range-from');
     this.rangeTo = document.getElementById('range-to');
+    this.status = document.getElementById("load-status");
     this.rangeGroup = document.getElementsByName('time-range');
 
     this.metrics = {
@@ -131,6 +133,7 @@ class PowerSnifferDashboard extends EventTarget {
       }
     }
 
+    this.setLiveAlive();
     this.updateLoadStatus();
     this.addFeedItem(metric, timestamp, value);
 
@@ -208,15 +211,26 @@ class PowerSnifferDashboard extends EventTarget {
   }
 
   updateLoadStatus() {
-    const connected =
-      this.metrics.voltage.value !== 0 ||
-      this.metrics.current.value !== 0;
+    const connected = !this.lastLiveActivity || ((Date.now() - this.lastLiveActivity) < 10000);
+    this.status.textContent = connected ? "Connected" : "Disconnected";
+    this.status.classList.toggle("text-bg-success", connected);
+    this.status.classList.toggle("text-bg-secondary", !connected);
+  }
 
-    const status = document.getElementById("load-status");
+  setLiveAlive() {
+    if (this.aliveTimeoutId) {
+      clearTimeout(this.aliveTimeoutId);
+    }
 
-    status.textContent = connected ? "Connected" : "Disconnected";
-    status.classList.toggle("text-bg-success", connected);
-    status.classList.toggle("text-bg-secondary", !connected);
+    this.status.textContent = "Connected";
+    this.status.classList.remove("text-bg-secondary");
+    this.status.classList.add("text-bg-success");
+
+    this.aliveTimeoutId = setTimeout(() => {
+      this.status.textContent = "Disconnected";
+      this.status.classList.remove("text-bg-success");
+      this.status.classList.add("text-bg-secondary");
+    }, 10000)
   }
 
   addFeedItem(metric, timestamp, value) {
